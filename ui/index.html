@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VinUni QC ReAct Agent | Model Context Protocol (MCP)</title>
+    <meta name="description" content="Trợ lý Tác tử Kiểm định Chất lượng Thông minh cho dữ liệu gán nhãn AI 2D/3D - Mô phỏng kiến trúc ReAct & MCP Server">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="brand-header">
+                <div class="brand-logo">
+                    <span class="logo-icon">⚡</span>
+                    <div>
+                        <h1>QC ReAct Agent</h1>
+                        <span class="brand-subtitle">Model Context Protocol</span>
+                    </div>
+                </div>
+                <div class="status-pill" id="system-status-pill">
+                    <span class="status-dot"></span>
+                    <span id="provider-name-display">Đang tải...</span>
+                </div>
+            </div>
+
+            <!-- QUICK TEST SUITE -->
+            <div class="sidebar-section">
+                <div class="section-title">
+                    <span>🧪 BỘ TEST CASES NGHIỆM THU</span>
+                    <span class="badge" id="tc-count-badge">5</span>
+                </div>
+                <div class="test-cases-list" id="test-cases-container">
+                    <!-- Sẽ được nạp động từ test_cases.json qua JS -->
+                </div>
+            </div>
+
+            <!-- DATABASE EXPLORER -->
+            <div class="sidebar-section">
+                <div class="section-title">
+                    <span>🗄️ CƠ SỞ DỮ LIỆU QC (MOCK)</span>
+                </div>
+                <div class="db-cards-list" id="db-cards-container">
+                    <!-- Sẽ được nạp từ /api/database -->
+                </div>
+            </div>
+
+            <!-- FOOTER INFO -->
+            <div class="sidebar-footer">
+                <div class="footer-meta">
+                    <p><strong>Học viên:</strong> Nguyễn Hải Long</p>
+                    <p><strong>MSSV:</strong> 2A202602471</p>
+                    <p><strong>Server:</strong> vinuni-qc-mcp-server</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CHAT AREA -->
+        <main class="main-content">
+            <!-- TOP BAR -->
+            <header class="chat-header">
+                <div class="header-left">
+                    <h2>Trung Tâm Kiểm Định Chất Lượng Dữ Liệu 2D/3D</h2>
+                    <p>Tác tử ReAct (Thought ➔ Action ➔ Observation) kết nối trực tiếp MCP Server</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="clear-chat-btn" title="Xóa lịch sử hội thoại">
+                        🗑️ Xóa Chat
+                    </button>
+                    <button class="btn btn-secondary" id="open-waterfall-btn" title="Xem Waterfall Trace Log">
+                        📊 Trace Log
+                    </button>
+                </div>
+            </header>
+
+            <!-- CHAT STREAM -->
+            <div class="chat-stream" id="chat-stream">
+                <!-- Welcome Banner -->
+                <div class="welcome-card" id="welcome-card">
+                    <div class="welcome-icon">🤖</div>
+                    <h3>Xin chào, Kiểm định viên QC!</h3>
+                    <p>Tôi là <strong>Trợ lý Tác tử Kiểm định Chất lượng Thông minh (ReAct QC Assistant)</strong>. Tôi được tích hợp sẵn 2 công cụ qua giao thức MCP:</p>
+                    <div class="tools-showcase">
+                        <div class="tool-tag"><code>qc_query</code>: Tra cứu thông tin & lịch sử ca lỗi 2D/3D</div>
+                        <div class="tool-tag"><code>create_rework_ticket</code>: Tạo phiếu Rework gửi đội gán nhãn</div>
+                    </div>
+                    <p class="welcome-tip">👉 Chọn một Test Case ở thanh bên trái hoặc nhập yêu cầu kiểm định bên dưới để bắt đầu!</p>
+                </div>
+            </div>
+
+            <!-- INPUT BAR -->
+            <div class="chat-input-area">
+                <form id="chat-form" class="chat-form">
+                    <textarea 
+                        id="user-input" 
+                        class="chat-textarea" 
+                        placeholder="Nhập yêu cầu tra cứu ca lỗi hoặc tạo phiếu Rework... (Nhấn Enter để gửi, Shift+Enter để xuống dòng)"
+                        rows="1"
+                        required
+                    ></textarea>
+                    <button type="submit" id="send-btn" class="send-btn" title="Gửi yêu cầu">
+                        <span class="send-icon">➤</span>
+                    </button>
+                </form>
+                <div class="input-footer">
+                    <span>ReAct Loop: <code>Thought</code> ➔ <code>Action (MCP Call)</code> ➔ <code>Observation</code> ➔ <code>Final Answer</code></span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL TRACE WATERFALL -->
+    <div class="modal-backdrop" id="waterfall-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>📊 Vết Thực Thi Waterfall Trace Log</h3>
+                <button class="modal-close-btn" id="close-waterfall-btn">✕</button>
+            </div>
+            <div class="modal-body" id="waterfall-modal-body">
+                <div class="waterfall-timeline" id="waterfall-timeline">
+                    <!-- Sẽ render động các bước từ docs/trace_waterfall.json -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

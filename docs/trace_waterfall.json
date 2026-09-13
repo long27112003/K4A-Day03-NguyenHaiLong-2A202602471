@@ -1,55 +1,25 @@
 [
   {
     "step": 1,
-    "query": "Kiểm tra ca QC-2D-001, nếu ca này đang bị lỗi thì tạo phiếu Rework cho ca đó.",
+    "query": "kiểm định QC9999999",
     "action_type": "TOOL_EXECUTION",
     "tool_name": "qc_query",
     "arguments": {
-      "qc_id": "QC-2D-001"
+      "qc_id": "QC9999999"
     },
     "observation": {
-      "status": "SUCCESS",
-      "qc_id": "QC-2D-001",
-      "data": {
-        "qc_id": "QC-2D-001",
-        "task_type": "2D Bounding Box",
-        "dataset": "Autopilot-Front-Cam",
-        "annotator": "nguyen_van_a",
-        "status": "FAILED",
-        "defect_type": "Sai nhãn đối tượng (Pedestrian nhầm thành Cyclist)",
-        "severity": "Cao",
-        "inspector": "QC_Lead_01"
-      },
-      "message": "Ca kiểm định QC-2D-001 (2D Bounding Box): Trạng thái 'FAILED', Lỗi: 'Sai nhãn đối tượng (Pedestrian nhầm thành Cyclist)', Mức độ: 'Cao'."
+      "status": "NOT_FOUND",
+      "qc_id": "QC9999999",
+      "message": "Không tìm thấy dữ liệu ca kiểm định có mã 'QC9999999' trong hệ thống QC."
     },
-    "latency_ms": 2644.24
+    "latency_ms": 2281.58
   },
   {
     "step": 2,
-    "query": "Kiểm tra ca QC-2D-001, nếu ca này đang bị lỗi thì tạo phiếu Rework cho ca đó.",
-    "action_type": "TOOL_EXECUTION",
-    "tool_name": "create_rework_ticket",
-    "arguments": {
-      "qc_id": "QC-2D-001",
-      "reason": "Sai nhãn đối tượng (Pedestrian nhầm thành Cyclist)",
-      "priority": "Cao"
-    },
-    "observation": {
-      "status": "SUCCESS",
-      "ticket_id": "RWK-QC-2D-001-01",
-      "qc_id": "QC-2D-001",
-      "reason": "Sai nhãn đối tượng (Pedestrian nhầm thành Cyclist)",
-      "priority": "Cao",
-      "message": "Tạo phiếu Rework thành công: Mã phiếu 'RWK-QC-2D-001-01' cho ca lỗi 'QC-2D-001' với lý do 'Sai nhãn đối tượng (Pedestrian nhầm thành Cyclist)', độ ưu tiên 'Cao'."
-    },
-    "latency_ms": 15.0
-  },
-  {
-    "step": 3,
-    "query": "Kiểm tra ca QC-2D-001, nếu ca này đang bị lỗi thì tạo phiếu Rework cho ca đó.",
+    "query": "kiểm định QC9999999",
     "action_type": "FINAL_ANSWER",
     "thought": "Tổng hợp kết quả từ MCP Server thành công.",
-    "output": "Ca kiểm định QC-2D-001 (2D Bounding Box): Trạng thái 'FAILED', Lỗi: 'Sai nhãn đối tượng (Pedestrian nhầm thành Cyclist)', Mức độ: 'Cao'. -> Tạo phiếu Rework thành công: Mã phiếu 'RWK-QC-2D-001-01' cho ca lỗi 'QC-2D-001' với lý do 'Sai nhãn đối tượng (Pedestrian nhầm thành Cyclist)', độ ưu tiên 'Cao'.",
+    "output": "Không tìm thấy dữ liệu ca kiểm định có mã 'QC9999999' trong hệ thống QC.",
     "latency_ms": 10.0
   }
 ]

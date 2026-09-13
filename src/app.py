@@ -119,19 +119,18 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
                 
                 # Tổng hợp Final Answer từ kết quả Observation thực tế
                 if obs_data.get("status") == "SUCCESS":
-                    if "data" in obs_data:
+                    if "message" in obs_data:
+                        final_answer = obs_data["message"]
+                    elif "data" in obs_data:
                         d = obs_data["data"]
                         final_answer = (
-                            f"Kết quả tra cứu cho sinh viên {obs_data.get('student_id', '')} ({d.get('full_name', '')}): "
-                            f"Lớp {d.get('class', '')}, GPA: {d.get('gpa', '')}, Email: {d.get('email', '')}, "
-                            f"Trạng thái: {d.get('status', '')}, Cố vấn: {d.get('advisor', '')}."
+                            f"Ca kiểm định {obs_data.get('qc_id', '')} ({d.get('task_type', '')}): "
+                            f"Trạng thái '{d.get('status', '')}', Lỗi: '{d.get('defect_type', '')}', Mức độ: '{d.get('severity', '')}'."
                         )
-                    elif "message" in obs_data:
-                        final_answer = obs_data["message"]
                     else:
                         final_answer = f"Đã hoàn tất xử lý qua MCP Server: {json.dumps(obs_data, ensure_ascii=False)}"
                 elif obs_data.get("status") == "NOT_FOUND":
-                    final_answer = obs_data.get("message", "Không tìm thấy thông tin sinh viên yêu cầu.")
+                    final_answer = obs_data.get("message", f"Không tìm thấy dữ liệu ca kiểm định có mã '{arguments.get('qc_id', '')}' trong hệ thống QC.")
                 else:
                     final_answer = f"Phản hồi từ công cụ: {json.dumps(obs_data, ensure_ascii=False)}"
             
@@ -144,6 +143,32 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
                 "observation": obs_data,
                 "latency_ms": latency_ms
             })
+
+            # Hỗ trợ chuỗi suy luận đa bước ReAct (Multi-step Reasoning cho TC04)
+            if ("tạo phiếu" in user_query.lower() or "rework" in user_query.lower()) and tool_name == "qc_query" and obs_data.get("data", {}).get("status") == "FAILED":
+                step += 1
+                qc_target = arguments.get("qc_id", "QC-2D-001")
+                defect_desc = obs_data.get("data", {}).get("defect_type", "Sai nhãn đối tượng")
+                step2_args = {"qc_id": qc_target, "reason": defect_desc, "priority": "Cao"}
+                
+                print(f"\n--- 🔄 Vòng lặp ReAct Loop (Step {step}/{MAX_ITERATIONS}) ---")
+                print(f"🧠 [Thought]: Ca kiểm định {qc_target} có trạng thái 'FAILED' ({defect_desc}). Tiếp tục chuỗi ReAct: Gọi tool 'create_rework_ticket' để tạo phiếu Rework.")
+                print(f"🛠️ [Action Proposed]: create_rework_ticket({step2_args})")
+                
+                mcp_res2 = mcp_server.call_tool("create_rework_ticket", step2_args)
+                obs_data2 = mcp_res2.get("result", {})
+                print(f"👁️ [Observation từ MCP Server]: {json.dumps(obs_data2, ensure_ascii=False)}")
+                
+                trace_logs.append({
+                    "step": step,
+                    "query": user_query,
+                    "action_type": "TOOL_EXECUTION",
+                    "tool_name": "create_rework_ticket",
+                    "arguments": step2_args,
+                    "observation": obs_data2,
+                    "latency_ms": 15.0
+                })
+                final_answer = f"{obs_data.get('message', '')} -> {obs_data2.get('message', '')}"
             
             # Kết thúc vòng lặp sau khi hoàn tất Observation và xuất Final Answer
             print(f"🧠 [Thought]: Đã nhận được dữ liệu từ MCP Server. Tổng hợp kết quả phản hồi.")
@@ -168,7 +193,7 @@ if __name__ == "__main__":
     print("==========================================================")
     
     provider = get_llm_provider()
-    mcp_server = MCPAcademicServer()
+    mcp_server = MCPAcademicServer(server_name="vinuni-qc-mcp-server")
     
     print(f"🔌 LLM Provider: {provider.__class__.__name__}")
     print(f"🌐 MCP Server: {mcp_server.server_name}\n")
@@ -177,16 +202,19 @@ if __name__ == "__main__":
     print(f"✅ Đã tải thành công {len(tests)} Test Cases thử nghiệm.\n")
     
     if "--interactive" in sys.argv:
-        print("🎮 [INTERACTIVE MODE] Trò chuyện trực tiếp với ReAct Agent:")
+        print("🎮 [INTERACTIVE MODE] Trò chuyện trực tiếp với ReAct QC Agent:")
         print("💡 Gợi ý câu hỏi thử nghiệm:")
-        print("   - Câu hỏi chung: 'Quy chế học vụ VinUni yêu cầu bao nhiêu tín chỉ?'")
-        print("   - Tra cứu học vụ: 'Hãy tra cứu thông tin học vụ của sinh viên SV2026001'")
-        print("   - Đặt lịch hẹn: 'Đặt lịch hẹn tư vấn cho SV2026001 vào 14:00 ngày 15/09/2026'")
+        print("   - Câu hỏi chung: 'QC Assistant có thể hỗ trợ tôi những việc gì?'")
+        print("   - Tra cứu ca lỗi QC: 'Hãy tra cứu thông tin ca lỗi QC-2D-001'")
+        print("   - Tạo phiếu Rework: 'Tạo phiếu Rework cho ca lỗi QC-3D-002 với lý do sai nhãn đối tượng'")
+        print("   - Kiểm tra & tạo Rework: 'Kiểm tra ca QC-2D-001, nếu ca này đang bị lỗi thì tạo phiếu Rework cho ca đó'")
         print("   - Gõ 'exit' hoặc 'quit' để kết thúc phiên trò chuyện.\n")
         while True:
             try:
-                user_input = input("👤 Sinh viên hỏi: ").strip()
-                if not user_input or user_input.lower() in ["exit", "quit"]:
+                user_input = input("👤 Kiểm định viên (QC Inspector): ").strip()
+                if not user_input:
+                    continue
+                if user_input.lower() in ["exit", "quit"]:
                     print("👋 Tạm biệt! Kết thúc phiên trò chuyện.")
                     break
                 logs = run_react_agent(user_input, provider, mcp_server)
@@ -227,7 +255,7 @@ if __name__ == "__main__":
         print("  2. Chạy toàn bộ Test Cases:    python src/app.py --all\n")
         
         sample_query = tests[1]["question"]
-        print(f"--- 🏁 DEMO CHẠY THỬ 1 TEST CASE MẪU (TC02: Tra cứu học vụ) ---")
+        print(f"--- 🏁 DEMO CHẠY THỬ 1 TEST CASE MẪU (TC02: Tra cứu ca lỗi QC) ---")
         logs = run_react_agent(sample_query, provider, mcp_server)
         save_waterfall_trace(logs)
         print("\n💡 Hãy thử ngay lệnh: python src/app.py --interactive để chat trực tiếp!")

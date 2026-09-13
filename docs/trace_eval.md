@@ -28,20 +28,28 @@ Dán 1 đoạn trích xuất log tiêu biểu từ file `docs/trace_waterfall.js
 [
   {
     "step": 1,
+    "query": "Hãy tra cứu thông tin ca lỗi QC-2D-001.",
     "action_type": "TOOL_EXECUTION",
-    "tool_name": "academic_query",
+    "tool_name": "qc_query",
     "arguments": {
-      "student_id": "SV2026001"
+      "qc_id": "QC-2D-001"
     },
     "observation": {
       "status": "SUCCESS",
-      "student_id": "SV2026001",
+      "qc_id": "QC-2D-001",
       "data": {
-        "full_name": "Nguyễn Văn An",
-        "gpa": 3.85
-      }
+        "qc_id": "QC-2D-001",
+        "task_type": "2D Bounding Box",
+        "dataset": "Autopilot-Front-Cam",
+        "annotator": "nguyen_van_a",
+        "status": "FAILED",
+        "defect_type": "Sai nhãn đối tượng (Pedestrian nhầm thành Cyclist)",
+        "severity": "Cao",
+        "inspector": "QC_Lead_01"
+      },
+      "message": "Ca kiểm định QC-2D-001 (2D Bounding Box): Trạng thái 'FAILED', Lỗi: 'Sai nhãn đối tượng (Pedestrian nhầm thành Cyclist)', Mức độ: 'Cao'."
     },
-    "latency_ms": 120.5
+    "latency_ms": 125.0
   }
 ]
 ```

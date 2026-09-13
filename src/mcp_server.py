@@ -31,38 +31,48 @@ class MCPAcademicServer:
         [TASK 2.1] HỌC VIÊN HOÀN THIỆN HÀM THỰC THI TOOL TRÊN MCP SERVER
         Thực thi request gọi Tool theo chuẩn MCP JSON-RPC
         """
-        # --------------------------------------------------------------------------
-        # TODO 2.1: HỌC VIÊN HOÀN THIỆN HÀM GỌI TOOL CHUẨN MCP JSON-RPC
-        # 🎯 YÊU CẦU THỰC THI THUẬT TOÁN:
-        # 1. Gọi hàm dispatch_tool_call(tool_name, arguments) để lấy chuỗi JSON kết quả từ Tool Router.
-        # 2. Chuyển đổi chuỗi JSON kết quả thành Python Dictionary (dùng json.loads).
-        # 3. Đóng gói phản hồi và trả về Dict theo đúng chuẩn giao thức MCP JSON-RPC 2.0:
-        #    - Các trường bắt buộc: "jsonrpc": "2.0", "server": self.server_name, "tool": tool_name, "result": content
-        # --------------------------------------------------------------------------
-        return {}
+        # Gọi hàm dispatch_tool_call để lấy chuỗi JSON kết quả từ Tool Router.
+        result_json = dispatch_tool_call(tool_name, arguments)
+
+        # Chuyển đổi chuỗi JSON kết quả thành Python Dictionary (dùng json.loads).
+        result_dict = json.loads(result_json)
+
+        # Đóng gói phản hồi và trả về Dict theo đúng chuẩn giao thức MCP JSON-RPC 2.0:
+        # - Các trường bắt buộc: "jsonrpc": "2.0", "server": self.server_name, "tool": tool_name, "result": content
+        response = {
+            "jsonrpc": "2.0",
+            "server": self.server_name,
+            "tool": tool_name,
+            "result": result_dict
+        }
+        return response
 
 
 if __name__ == "__main__":
     print("==========================================================")
-    print("🔌 KIỂM THỬ ĐỘC LẬP MCP SERVER (vinuni-academic-mcp-server)")
+    print("🔌 KIỂM THỬ ĐỘC LẬP MCP SERVER (vinuni-qc-mcp-server)")
     print("==========================================================")
     
-    server = MCPAcademicServer()
+    server = MCPAcademicServer(server_name="vinuni-qc-mcp-server")
     tools = server.list_tools()
-    print(f"✅ Khởi tạo thành công MCP Server: {server.server_name} (Version: {server.version})")
-    print(f"📦 Số lượng Tools công bố: {len(tools)}")
+    print(f"✅ [MCP SERVER] Đã khởi tạo thành công {server.server_name} (Version: {server.version})")
+    print(f"📦 Số lượng Tools công bố qua MCP: {len(tools)}")
     
     # Kiểm tra trạng thái TODO 1.2 (Tool Schema)
-    sched_tool = next((t for t in tools if t.get("name") == "schedule_appointment"), None)
-    if sched_tool and not sched_tool.get("parameters", {}).get("properties"):
-        print("⏳ [TODO 1.2]: Tool 'schedule_appointment' chưa được định nghĩa properties trong 'src/tools.py'.")
+    rework_tool = next((t for t in tools if t.get("name") in ["create_rework_ticket", "schedule_appointment"]), None)
+    if rework_tool and not rework_tool.get("parameters", {}).get("properties"):
+        print(f"⏳ [TODO 1.2]: Tool '{rework_tool.get('name')}' chưa được định nghĩa properties trong 'src/tools.py'.")
     else:
-        print("✅ [TODO 1.2]: Tool 'schedule_appointment' đã có schema đầy đủ.")
+        tool_name_found = rework_tool.get("name") if rework_tool else "create_rework_ticket"
+        print(f"✅ [TODO 1.2]: Tool '{tool_name_found}' đã có schema đầy đủ.")
 
     # Kiểm tra trạng thái TODO 2.1 (call_tool)
-    test_result = server.call_tool("academic_query", {"student_id": "SV2026001"})
-    if not test_result:
+    test_tool_name = "qc_query" if any(t.get("name") == "qc_query" for t in tools) else "academic_query"
+    test_args = {"qc_id": "QC-2D-001"} if test_tool_name == "qc_query" else {"student_id": "SV2026001"}
+    
+    test_result = server.call_tool(test_tool_name, test_args)
+    if not test_result or not test_result.get("result"):
         print("⏳ [TODO 2.1]: Hàm call_tool() đang trả về rỗng. Học viên hãy hoàn thiện TODO 2.1 trong 'src/mcp_server.py'!")
     else:
-        print(f"✅ [TODO 2.1]: Test dispatch tool 'academic_query' thành công:")
+        print(f"✅ [TODO 2.1]: Test dispatch tool '{test_tool_name}' thành công:")
         print(f"   Phản hồi JSON-RPC: {json.dumps(test_result, ensure_ascii=False)}")

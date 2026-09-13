@@ -32,31 +32,71 @@ class MockOfflineProvider(BaseLLMProvider):
         self.model_name = "Offline-Mock-Model-2026"
 
     def generate(self, prompt: str, system_prompt: str = "") -> str:
-        return f"[Mock Chatbot Response]: Xin chào! Tôi đã nhận được câu hỏi '{prompt}'. (Chế độ Chatbot không có Tool tra cứu dữ liệu thời gian thực)."
+        return f"[Mock Chatbot Response]: Xin chào! Tôi là Trợ lý Kiểm định Chất lượng QC. Đã nhận câu hỏi '{prompt}'. (Chế độ Chatbot cơ bản không có công cụ tra cứu CSDL hay tạo phiếu Rework thời gian thực)."
 
     def generate_with_tools(self, prompt: str, tools_schema: List[Dict[str, Any]], system_prompt: str = "") -> Dict[str, Any]:
         prompt_lower = prompt.lower()
         
-        # Mô phỏng nhận diện intent gọi Tool
-        if "sv2026001" in prompt_lower and "đặt lịch" in prompt_lower:
+        # Mô phỏng nhận diện intent gọi Tool cho chủ đề QC gán nhãn 2D/3D
+        if "qc-999999" in prompt_lower:
             return {
                 "type": "tool_call",
-                "tool_name": "schedule_appointment",
-                "arguments": {"student_id": "SV2026001", "datetime_str": "14:00 15/09/2026", "advisor_name": "PGS.TS Nguyễn Văn A"},
-                "thought": "Người dùng yêu cầu đặt lịch hẹn tư vấn cho sinh viên SV2026001. Tôi sẽ gọi tool schedule_appointment."
+                "tool_name": "qc_query",
+                "arguments": {"qc_id": "QC-999999"},
+                "thought": "Người dùng muốn tra cứu ca lỗi QC-999999. Tôi sẽ gọi tool 'qc_query' để truy vấn cơ sở dữ liệu."
             }
-        elif "sv2026001" in prompt_lower or "tra cứu" in prompt_lower:
+        elif "rework" in prompt_lower or "tạo phiếu" in prompt_lower:
+            if "qc-3d-002" in prompt_lower:
+                return {
+                    "type": "tool_call",
+                    "tool_name": "create_rework_ticket",
+                    "arguments": {"qc_id": "QC-3D-002", "reason": "sai nhãn đối tượng", "priority": "Cao"},
+                    "thought": "Người dùng yêu cầu tạo phiếu Rework cho ca lỗi QC-3D-002 với lý do sai nhãn đối tượng. Tôi sẽ gọi tool 'create_rework_ticket'."
+                }
+            elif "qc-2d-001" in prompt_lower:
+                # Phục vụ TC04: Nếu có 'kiểm tra', ưu tiên tra cứu trạng thái trước
+                if "kiểm tra" in prompt_lower:
+                    return {
+                        "type": "tool_call",
+                        "tool_name": "qc_query",
+                        "arguments": {"qc_id": "QC-2D-001"},
+                        "thought": "Yêu cầu kiểm tra ca QC-2D-001 trước khi quyết định tạo phiếu Rework. Tôi sẽ gọi tool 'qc_query' để xác minh trạng thái ca lỗi."
+                    }
+                return {
+                    "type": "tool_call",
+                    "tool_name": "create_rework_ticket",
+                    "arguments": {"qc_id": "QC-2D-001", "reason": "Lỗi gán nhãn", "priority": "Cao"},
+                    "thought": "Người dùng yêu cầu tạo phiếu Rework cho ca lỗi QC-2D-001. Tôi sẽ gọi tool 'create_rework_ticket'."
+                }
+            else:
+                return {
+                    "type": "tool_call",
+                    "tool_name": "create_rework_ticket",
+                    "arguments": {"qc_id": "QC-3D-002", "reason": "sai nhãn đối tượng", "priority": "Cao"},
+                    "thought": "Người dùng yêu cầu tạo phiếu Rework kiểm định. Tôi sẽ gọi tool 'create_rework_ticket'."
+                }
+        elif "qc-2d-001" in prompt_lower or "tra cứu" in prompt_lower or "kiểm tra" in prompt_lower:
+            target_id = "QC-2D-001"
+            if "qc-3d-002" in prompt_lower:
+                target_id = "QC-3D-002"
             return {
                 "type": "tool_call",
-                "tool_name": "academic_query",
-                "arguments": {"student_id": "SV2026001"},
-                "thought": "Người dùng muốn tra cứu thông tin học vụ của sinh viên SV2026001. Tôi sẽ gọi tool academic_query."
+                "tool_name": "qc_query",
+                "arguments": {"qc_id": target_id},
+                "thought": f"Người dùng muốn tra cứu thông tin ca kiểm định {target_id}. Tôi sẽ gọi tool 'qc_query'."
+            }
+        elif "sv2026001" in prompt_lower:
+            return {
+                "type": "tool_call",
+                "tool_name": "qc_query",
+                "arguments": {"qc_id": "QC-2D-001"},
+                "thought": "Truy vấn tương thích ngược. Tôi sẽ gọi tool 'qc_query'."
             }
         else:
             return {
                 "type": "text",
-                "content": f"[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-                "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool."
+                "content": "[Mock Agent Response]: Xin chào! Tôi là Trợ lý Kiểm định Chất lượng (QC Assistant) chuyên trách dữ liệu gán nhãn 2D/3D. Tôi có thể hỗ trợ bạn: 1. Tra cứu thông tin và lịch sử ca lỗi kiểm định ('qc_query'). 2. Tự động tạo phiếu Rework gửi đội gán nhãn sửa lại ('create_rework_ticket').",
+                "thought": "Câu hỏi chung về chức năng của QC Assistant, trả lời trực tiếp không cần gọi Tool."
             }
 
 

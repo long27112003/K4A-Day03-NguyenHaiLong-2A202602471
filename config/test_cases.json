@@ -1,0 +1,37 @@
+[
+  {
+    "id": "TC01",
+    "type": "direct_query",
+    "question": "QC Assistant có thể hỗ trợ tôi những việc gì",
+    "expected_behavior": "Agent trả lời trực tiếp về chức năng tra cứu ca lỗi gán nhãn 2D/3D và tạo phiếu Rework, không cần gọi Tool.",
+    "complexity": "Low"
+  },
+  {
+    "id": "TC02",
+    "type": "single_tool_query",
+    "question": "Hãy tra cứu thông tin ca lỗi QC-2D-001.",
+    "expected_behavior": "Agent gọi tool tra cứu lỗi QC với mã QC-2D-001 và trả về thông tin ca lỗi.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC03",
+    "type": "rework_creation",
+    "question": "Tạo phiếu Rework cho ca lỗi QC-3D-002 với lý do sai nhãn đối tượng.",
+    "expected_behavior": "Agent gọi tool tạo phiếu Rework với đúng mã ca lỗi và lý do.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC04",
+    "type": "multi_step_reasoning",
+    "question": "Kiểm tra ca QC-2D-001, nếu ca này đang bị lỗi thì tạo phiếu Rework cho ca đó.",
+    "expected_behavior": "Agent thực hiện nhiều bước: tra cứu QC-2D-001 trước, đọc kết quả, nếu trạng thái là lỗi thì tiếp tục gọi Tool tạo phiếu Rework.",
+    "complexity": "High"
+  },
+  {
+    "id": "TC05",
+    "type": "edge_case_handling",
+    "question": "Tra cứu ca lỗi QC-999999.",
+    "expected_behavior": "Agent gọi Tool tra cứu, nhận kết quả NOT_FOUND và thông báo không tìm thấy ca lỗi, không tự bịa dữ liệu.",
+    "complexity": "Medium"
+  }
+]

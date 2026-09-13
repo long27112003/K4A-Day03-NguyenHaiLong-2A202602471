@@ -1,8 +1,8 @@
 # 📊 BÁO CÁO THU HOẠCH NGHIỆM THU BÀI LAB 3 (BƯỚC 3 — SUBMISSION ARTIFACT)
 
-> **Họ và Tên Học viên:** [Điền Họ và Tên]  
-> **Mã Sinh Viên / Mã Học viên:** [Điền MSSV]  
-> **Chủ đề Lựa chọn:** [Điền tên chủ đề đã chọn từ docs/DANH_SACH_DE_TAI.md hoặc Đề tài Mở]  
+> **Họ và Tên Học viên:** [Nguyễn Hải Long]  
+> **Mã Sinh Viên / Mã Học viên:** [2A202602471]  
+> **Chủ đề Lựa chọn:** [Trợ lý Kiểm định Chất lượng (QC Assistant):* Tra cứu ca lỗi gán nhãn 2D/3D và tạo phiếu Rework kiểm định.]  
 
 ---
 
@@ -10,11 +10,11 @@
 
 | Tiêu chí Đánh giá | Mức độ (1 - 5) | Giải trình chi tiết lý do chọn điểm |
 | :--- | :---: | :--- |
-| **1. Multi-step Reasoning** | / 5 | Bài toán có yêu cầu chia nhỏ nhiều bước suy luận nối tiếp nhau không? |
-| **2. Tool Interaction** | / 5 | Hệ thống có cần kết nối với MCP Server / Cơ sở dữ liệu bên ngoài không? |
-| **3. Dynamic Decision** | / 5 | Bước tiếp theo có phụ thuộc vào kết quả quan sát bước trước không? |
-| **4. Long Horizon Goal** | / 5 | Hệ thống có phải giữ mục tiêu xuyên suốt qua nhiều lượt xử lý không? |
-| **TỔNG ĐIỂM AGENTIC FIT** | **/ 20** | *Nếu tổng điểm > 12/20: Bài toán rất phù hợp triển khai Agentic System.* |
+| **1. Multi-step Reasoning** | 4 / 5 | Cần xâu chuỗi nhiều bước logic (như ở TC04: Tra cứu thông tin ca kiểm định `QC-2D-001` $\rightarrow$ Đọc kết quả quan sát phân tích trạng thái có bị lỗi không $\rightarrow$ Nếu có lỗi, trích xuất dữ liệu để tự động kích hoạt tạo phiếu Rework). Chatbot đơn thuần không thể tự phân nhánh suy luận đa bước như vậy. |
+| **2. Tool Interaction** | 5 / 5 | Hệ thống bắt buộc phải tương tác với MCP Server để kết nối CSDL kiểm định chất lượng gán nhãn: tra cứu thông tin ca lỗi 2D/3D và ghi nhận tạo phiếu Rework vào hệ thống. LLM không thể tự có dữ liệu nội bộ và không được phép bịa đặt (Hallucination). |
+| **3. Dynamic Decision** | 5 / 5 | Hành động của Agent thay đổi linh hoạt theo kết quả Observation ở bước trước: Nếu tra cứu không tìm thấy ca lỗi (TC05 - NOT_FOUND) thì dừng và phản hồi ngoại lệ; nếu ca lỗi hợp lệ và có trạng thái cần sửa (TC04) thì mới tiếp tục gọi Tool tạo phiếu Rework; nếu người dùng chỉ hỏi nghiệp vụ chung (TC01) thì trả lời trực tiếp không gọi Tool. |
+| **4. Long Horizon Goal** | 4 / 5 | Agent phải ghi nhớ và duy trì mục tiêu nghiệp vụ xuyên suốt vòng lặp ReAct: từ tiếp nhận yêu cầu, kiểm tra thông tin, xử lý ngoại lệ, đến khi xác nhận tạo phiếu Rework thành công cho kiểm định viên (QC Inspector). |
+| **TỔNG ĐIỂM AGENTIC FIT** | **18 / 20** | *Đạt 18/20 điểm (> 12/20): Bài toán Trợ lý Kiểm định Chất lượng QC rất phù hợp và cần thiết để triển khai ReAct Agent System.* |
 
 ---
 

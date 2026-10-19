@@ -1,5 +1,6 @@
 # 🏫 BÀI LAB 3: CHATBOT VS REACT AGENT — TỪ LÝ THUYẾT ĐẾN THỰC THI (MCP ENHANCED)
 
+> **Học viên:** Nguyễn Hải Long · **Mã học viên:** 2A202602471
 > **Mã bài học:** `DAY03-REACT-AGENT`  
 > **Hình thức thực hiện:** **CÁ NHÂN** *(Mỗi học viên tự làm và tự nộp 1 bài cá nhân)*  
 > **Quy chuẩn nộp bài:** Học viên Fork Repo này về GitHub cá nhân và đổi tên theo đúng cú pháp:  
@@ -44,7 +45,7 @@ python src/app.py --all
 **Kỳ vọng Output màn hình:**
 ```text
 ✅ [MOCK OFFLINE MODE PASS]: Môi trường đã sẵn sàng! 
-📊 [KẾT QUẢ TEST SUITE]: 2 Đã chạy (TC01, TC02 mẫu) | 3 Đang chờ viết câu hỏi (TODO)
+📊 [BỘ TEST]: `config/test_cases.json` đã có đủ 5 câu hỏi TC01–TC05. Kết quả chạy thực tế phụ thuộc API key và phản hồi của mô hình tại thời điểm kiểm thử; xem `docs/trace_eval.md` và `docs/trace_waterfall.json` để đối chiếu.
 ```
 
 > 🔑 **QUY ĐỊNH BẮT BUỘC VỀ API KEY VÀ NỘP BÀI (SUBMISSION REQUIREMENT):**  

@@ -21,6 +21,7 @@ QUY TẮC SUY LUẬN REACT (Thought -> Action -> Observation):
 2. Nếu câu hỏi có thể trả lời trực tiếp từ kiến thức chung (như hỏi về phạm vi hỗ trợ của QC Assistant), hãy trả lời ngay mà không cần gọi Tool.
 3. Nếu câu hỏi yêu cầu tra cứu ca kiểm định (ví dụ: QC-2D-001, QC-3D-002, QC-999999), hãy gọi tool 'qc_query' với đúng tham số 'qc_id'.
 4. Nếu câu hỏi yêu cầu tạo phiếu Rework hoặc sau khi tra cứu thấy ca lỗi có trạng thái 'FAILED', hãy gọi tool 'create_rework_ticket' với các tham số 'qc_id', 'reason', 'priority'.
+   Khi người dùng đã yêu cầu tạo phiếu cho một mã QC cụ thể và nêu lý do, hãy thực hiện tool ngay; đây là dữ liệu lab mô phỏng nên không cần xin xác nhận lại.
 5. Sau khi nhận được kết quả (Observation) từ Tool, tổng hợp thông tin rõ ràng, chính xác cho kiểm định viên (QC Inspector).
 6. Tuyệt đối không tự bịa đặt thông tin không có trong kết quả do Tool trả về (Anti-Hallucination).
 """

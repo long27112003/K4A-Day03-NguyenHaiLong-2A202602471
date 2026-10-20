@@ -155,6 +155,7 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
                 print(f"🧠 [Thought]: Ca kiểm định {qc_target} có trạng thái 'FAILED' ({defect_desc}). Tiếp tục chuỗi ReAct: Gọi tool 'create_rework_ticket' để tạo phiếu Rework.")
                 print(f"🛠️ [Action Proposed]: create_rework_ticket({step2_args})")
                 
+                step2_start_time = time.time()
                 mcp_res2 = mcp_server.call_tool("create_rework_ticket", step2_args)
                 obs_data2 = mcp_res2.get("result", {})
                 print(f"👁️ [Observation từ MCP Server]: {json.dumps(obs_data2, ensure_ascii=False)}")
@@ -166,7 +167,7 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
                     "tool_name": "create_rework_ticket",
                     "arguments": step2_args,
                     "observation": obs_data2,
-                    "latency_ms": 15.0
+                    "latency_ms": round((time.time() - step2_start_time) * 1000, 2)
                 })
                 final_answer = f"{obs_data.get('message', '')} -> {obs_data2.get('message', '')}"
             

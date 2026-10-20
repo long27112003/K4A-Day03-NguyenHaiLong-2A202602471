@@ -20,47 +20,25 @@
 
 ## 2. TRÍCH XUẤT KẾT QUẢ WATERFALL TRACE LOG (SAU KHI CHẠY TEST SUITE TRÊN API THẬT)
 
-> ⚠️ **YÊU CẦU NGHIỆM THU:** Mở tệp `.env` điền `GEMINI_API_KEY` (hoặc `OPENAI_API_KEY`) để kết nối LLM thật trước khi thực thi `python src/app.py --all`. Bài nộp chỉ dùng Mock Offline Provider sẽ không đạt điểm nghiệm thực tế.
+> **Nghiệm thu:** chạy `python src/app.py --all` với `LLM_PROVIDER=openai`, `LLM_MODEL=gpt-4o-mini` và `OPENAI_API_KEY` trong biến môi trường của tiến trình. Không lưu khóa vào repo. Log chạy không có cảnh báo fallback Mock.
 
-Dán 1 đoạn trích xuất log tiêu biểu từ file `docs/trace_waterfall.json` sinh ra từ phản hồi LLM API thật:
+Trace đầy đủ: [`docs/trace_waterfall.json`](trace_waterfall.json), gồm 5 `FINAL_ANSWER` và 5 `TOOL_EXECUTION`.
 
-```json
-[
-  {
-    "step": 1,
-    "query": "Hãy tra cứu thông tin ca lỗi QC-2D-001.",
-    "action_type": "TOOL_EXECUTION",
-    "tool_name": "qc_query",
-    "arguments": {
-      "qc_id": "QC-2D-001"
-    },
-    "observation": {
-      "status": "SUCCESS",
-      "qc_id": "QC-2D-001",
-      "data": {
-        "qc_id": "QC-2D-001",
-        "task_type": "2D Bounding Box",
-        "dataset": "Autopilot-Front-Cam",
-        "annotator": "nguyen_van_a",
-        "status": "FAILED",
-        "defect_type": "Sai nhãn đối tượng (Pedestrian nhầm thành Cyclist)",
-        "severity": "Cao",
-        "inspector": "QC_Lead_01"
-      },
-      "message": "Ca kiểm định QC-2D-001 (2D Bounding Box): Trạng thái 'FAILED', Lỗi: 'Sai nhãn đối tượng (Pedestrian nhầm thành Cyclist)', Mức độ: 'Cao'."
-    },
-    "latency_ms": 125.0
-  }
-]
-```
+| Ca | Kết quả quan sát |
+|---|---|
+| TC01 | Trả lời trực tiếp, không gọi tool. |
+| TC02 | `qc_query(QC-2D-001)` → `SUCCESS`. |
+| TC03 | `create_rework_ticket(QC-3D-002)` → `SUCCESS`. |
+| TC04 | `qc_query(QC-2D-001)` → `SUCCESS`, sau đó `create_rework_ticket` → `SUCCESS`. |
+| TC05 | `qc_query(QC-999999)` → `NOT_FOUND`; không bịa hồ sơ. |
 
 ---
 
 ## 3. TỔNG KẾT KẾT QUẢ NGHIỆM THU & NỘP BÀI
 
-- [x] Đã điền API Key thật trong `.env` và xác nhận Agent chạy mượt mà trên LLM API thật (Gemini/OpenAI).
+- [x] Đã chạy OpenAI API thật bằng khóa trong biến môi trường tiến trình, không dùng Mock.
 - **Tổng số Test Cases đã chạy thành công:** 5 / 5 test cases.
-- **Số lượt gọi Tool qua MCP Server chính xác:** 6 lượt.
+- **Số lượt gọi Tool qua MCP Server chính xác:** 5 lượt.
 - **Kết quả đẩy Repo nộp bài:** [x] Đã Commit và Push mã nguồn thành công lên GitHub cá nhân.
 
 ---

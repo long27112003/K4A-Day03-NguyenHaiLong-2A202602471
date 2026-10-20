@@ -247,8 +247,7 @@ class OpenAIProvider(BaseLLMProvider):
                     "thought": "OpenAI phản hồi trực tiếp bằng văn bản (không cần gọi công cụ)."
                 }
         except Exception as e:
-            print(f"⚠️ [OpenAI API Warning]: Không thể kết nối live API ({str(e)}). Tự động fallback về Mock.")
-            return MockOfflineProvider().generate_with_tools(prompt, tools_schema, system_prompt)
+            raise RuntimeError("OpenAI live API failed; no Mock result was substituted") from e
 
 
 def get_llm_provider() -> BaseLLMProvider:
